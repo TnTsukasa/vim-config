@@ -157,6 +157,7 @@ let g:coc_global_extensions = [
 	    \ 'coc-pyright',
 	    \ 'coc-snippets',
         \ 'coc-texlab',
+        \ 'coc-vimtex',
         \ 'coc-markdownlint',
         \ 'coc-sh',
         \ 'coc-cmake',
@@ -466,7 +467,11 @@ let c_no_curly_error=1
 " see ":help vimtex-compiler".
 let g:vimtex_compiler_method = 'latexmk'
 
-" latexmk config
+" Most VimTeX mappings rely on localleader and this can be changed with the
+" following line. The default is usually fine and is the symbol '\'
+let maplocalleader = ","
+
+" latexmk basic config
 let g:vimtex_compiler_latexmk = {
     \ 'build_dir' : '',
     \ 'callback' : 1,
@@ -481,9 +486,7 @@ let g:vimtex_compiler_latexmk = {
     \ ],
     \}
 
-"这里是LaTeX编译引擎的设置，这里默认LaTeX编译方式为-pdf(pdfLaTeX),
-"vimtex提供了magic comments来为文件设置编译方式
-"例如，我在tex文件开头输入 % !TEX program = xelatex   即指定-xelatex （xelatex）编译文件
+" latex complier engine basic config
 let g:vimtex_compiler_latexmk_engines = {
     \ '_'                : '-pdf',
     \ 'pdflatex'         : '-pdf',
@@ -498,32 +501,64 @@ let g:vimtex_compiler_latexmk_engines = {
 " Viewer options: One may configure the viewer either by specifying a built-in
 " viewer method:
 let g:vimtex_view_method = 'zathura'
-let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
-" 保存修改之后可以实时输出
+let g:vimtex_view_options = '--unique file:@pdf\#src:@line@tex'
+
+" compile and change pdf in time, it is default
 let g:vimtex_view_automatic = 1
 
-"LaTeX配置
+" word count
 let g:tex_flavor='latex'
 let g:vimtex_texcount_custom_arg=' -ch -total'
-"映射VimtexCountWords！\lw 在命令模式下enter此命令可统计中英文字符的个数
+" 映射VimtexCountWords！ <leader>lw 在命令模式下enter此命令可统计中英文字符的个数
 au FileType tex map <buffer> <silent>  <leader>lw :VimtexCountWords!  <CR><CR>
 let g:Tex_ViewRule_pdf = 'zathura -reuse-instance -inverse-search "vim -c \":RemoteOpen +\%l \%f\""'
 
-" 阅读器相关的配置 包含正反向查找功能 仅供参考
-let g:vimtex_view_general_viewer = 'zathura'
-let g:vimtex_view_general_options_latexmk = '-reuse-instance'
-let g:vimtex_view_general_options
-     \ = ' -reuse-instance -forward-search @tex @line @pdf'
-     \ . ' -inverse-search "' . 'cmd /c start /min \"\" '  . exepath(v:progpath)
-     \ . ' -v --not-a-term -T dumb -c  \"VimtexInverseSearch %l ''%f''\""'
-
-"编译过程中忽略警告信息
+" 编译过程中忽略警告信息
 let g:vimtex_quickfix_open_on_warning=0
 
-" key bind
-nnoremap <leader>vc :VimtexCompile<CR>
-nnoremap <leader>vs :VimtexStop<CR>
-
+" some default key bind
+" <localleader>ll: start compiling the document
+" <localleader>lk: stop compiling process
+" <localleader>lc: clear auxiliary files
+" <localleader>lv: forward search, hight the row in PDF with corresponding cursor 
+" <localleader>le: error info
+" <localleader>lt: table of contents, can direct jumpy to it
+"
+" some movtions
+" [[, [], ][, ]] : move between sections
+" [m, [M, ]m, ]M : move between environments
+" [n, [N, ]n, ]N : move between math environments
+" [r, [R, ]r, ]R : move between frame environments
+" [*, ]*         : move between comment environments
+" %              : move between matching delimiters
+"
+" some text objects select
+" first into virtual mode, then use following short cut to select texts
+" some configs a -> including Latex command, i -> excluding Latex command
+" ic ac: comments
+" id ad: delimiters
+" ie ae: latex environments
+" i$ a$: math environments
+" iP aP: sections
+" im am: items
+"
+" other mappings 
+" some configs:
+"               c -> change, d -> delete, t -> toggle
+"               i -> inner text, s -> surrounding command, a -> all
+"               c -> comment, e -> environment, $ -> math environment, d -> delimiter
+" dsc, dse, ds$, dsd: delete surrounding comments
+" csc, cse, cs$, csd: changes surrounding environments
+" tsc: toggles the * in command
+" tse: toggles the * in environments
+" tsd: toggles between () and \left( \right)
+" ts$: toggles inline and displaymath
+" tsf: toggles inline fractions 
+" ]] : close the current environment/delimiter in insert mode 
+" F8 : add \left ... \right)
+" F7 : insert new command
+"<cr>: context menu on citations (e.g. \cite{...}) mapped to <cr>
+"
 "-----------------------------------------------------------------------------
 "  markdown instant preview
 "-----------------------------------------------------------------------------
